@@ -2,11 +2,11 @@
 
 ## 当前状态
 
-🚧 开发中
+🟡 PR 审核中
 
 ## Pull Request
 
-尚未创建。
+[GitHub PR #4](https://github.com/norafu-dev/ai-trading/pull/4)
 
 ## 本任务目标
 
@@ -55,8 +55,8 @@
 
 ```mermaid
 flowchart LR
-    D["Discord Gateway<br/>开发中"] --> C["Discord Collector Adapter<br/>开发中"]
-    C --> N["RawMessageCreate<br/>开发中"]
+    D["Discord Gateway<br/>待真实消息验收"] --> C["Discord Collector Adapter<br/>PR #4 审核中"]
+    C --> N["RawMessageCreate<br/>PR #4 审核中"]
     N --> R["RawMessage<br/>PR #2 审核中"]
     R --> P["PostgreSQL<br/>基础连接已完成"]
 
@@ -65,7 +65,8 @@ flowchart LR
     classDef progress fill:#dbeafe,stroke:#2563eb,color:#1e3a8a;
     class P done;
     class R review;
-    class D,C,N progress;
+    class D progress;
+    class C,N review;
 ```
 
 ## 已知问题 / 风险
@@ -76,6 +77,6 @@ flowchart LR
 
 ## 下一步
 
-1. 完成本地单元测试与 PostgreSQL 集成测试。
-2. 创建目标为 `main` 的 NORA-10 PR，并更新状态与 PR URL。
-3. 由具备 Discord 权限的人工完成一条真实消息验收；不自动 Merge PR。
+1. 审核目标为 `main` 的 PR #4。
+2. 由具备 Discord 权限的人工完成一条真实消息验收。
+3. 验收后由人工决定是否 Merge；本任务不自动 Merge PR。
