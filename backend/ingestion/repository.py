@@ -1,4 +1,5 @@
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.ingestion.models import RawMessage
@@ -28,3 +29,28 @@ class RawMessageRepository:
             RawMessage.message_id == message_id,
         )
         return await self._session.scalar(statement)
+
+    async def create_if_absent(
+        self,
+        data: RawMessageCreate,
+    ) -> tuple[RawMessage, bool]:
+        """Persist one external fact and return the existing row on duplicates."""
+        existing = await self.get_by_platform_message_id(data.platform, data.message_id)
+        if existing is not None:
+            return existing, False
+
+        try:
+            async with self._session.begin_nested():
+                created = await self.create(data)
+        except IntegrityError:
+            # A concurrent worker may win after the initial read. The savepoint
+            # keeps the outer transaction usable so the winning row can be read.
+            existing = await self.get_by_platform_message_id(
+                data.platform,
+                data.message_id,
+            )
+            if existing is None:
+                raise
+            return existing, False
+
+        return created, True

@@ -25,6 +25,7 @@ M1 的目标是从 Discord 目标频道获取消息，通过可替换的 Collect
 | 🟡 PR 审核中 | DOCS-001 | 建立项目架构基线 | GitHub PR #1 仍为 Open，尚未 Merge 到 `main` |
 | 🟡 PR 审核中 | INGEST-001 | 实现 RawMessage 领域模型 | GitHub PR #2 已按 Review 更新，尚未 Merge 到 `main` |
 | 🟡 PR 审核中 | DOCS-002 | 建立 Agent 固定交付规范与项目进度可视化机制 | GitHub PR #3 已创建，尚未 Merge 到 `main` |
+| 🚧 开发中 | NORA-10 / MVP-001 | 实现 Discord → RawMessage → PostgreSQL 的最小闭环 | 当前 feature branch 正在开发，尚未创建 PR |
 | ⏳ 待开始 | INGEST-002 | 实现 Collector 抽象层 | 未开始 |
 | ⏳ 待开始 | INGEST-003 | 实现 Discord Collector | 未开始 |
 | ⏳ 待开始 | INGEST-004 | 实现采集可靠性与自动恢复 | 未开始 |
@@ -38,12 +39,14 @@ flowchart LR
     DOCS1["DOCS-001<br/>架构基线<br/>PR 审核中"]
     INGEST1["INGEST-001<br/>RawMessage 领域模型<br/>PR 审核中"]
     DOCS2["DOCS-002<br/>Agent 交付规范<br/>PR 审核中"]
+    MVP1["NORA-10 / MVP-001<br/>Discord 最小闭环<br/>开发中"]
     INGEST2["INGEST-002<br/>Collector 抽象<br/>待开始"]
     INGEST3["INGEST-003<br/>Discord Collector<br/>待开始"]
     INGEST4["INGEST-004<br/>可靠性与恢复<br/>待开始"]
     INGEST5["INGEST-005<br/>监控 API<br/>待开始"]
 
     INIT --> INGEST1 --> INGEST2 --> INGEST3 --> INGEST4 --> INGEST5
+    INGEST1 --> MVP1
     INIT --> DOCS1 --> DOCS2
 
     classDef done fill:#d1fae5,stroke:#047857,color:#064e3b;
@@ -51,7 +54,9 @@ flowchart LR
     classDef pending fill:#f3f4f6,stroke:#6b7280,color:#374151;
 
     class INIT done;
+    classDef progress fill:#dbeafe,stroke:#2563eb,color:#1e3a8a;
     class DOCS1,INGEST1,DOCS2 review;
+    class MVP1 progress;
     class INGEST2,INGEST3,INGEST4,INGEST5 pending;
 ```
 
@@ -59,8 +64,8 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    D["Discord<br/>尚未接入"] --> C["Collector<br/>尚未实现"]
-    C --> N["NormalizedMessage<br/>尚未实现"]
+    D["Discord<br/>开发中"] --> C["Collector Adapter<br/>开发中"]
+    C --> N["RawMessageCreate 标准化<br/>开发中"]
     N --> R["RawMessage<br/>PR #2 审核中"]
     R --> P["PostgreSQL<br/>基础连接已进入 main"]
 
@@ -70,11 +75,12 @@ flowchart LR
 
     class P done;
     class R review;
-    class D,C,N pending;
+    classDef progress fill:#dbeafe,stroke:#2563eb,color:#1e3a8a;
+    class D,C,N progress;
 ```
 
 ## 下一步
 
 1. 审核并决定是否 Merge DOCS-001 PR #1、INGEST-001 PR #2 和 DOCS-002 PR #3。
 2. 只有在相应 PR Merge 到 `main` 后，才将状态改为“✅ 已完成”。
-3. 不在 INGEST-001 中开始 INGEST-002。
+3. 审核 NORA-10 的最小闭环实现；无法邀请官方 Bot 的目标服务器仍需要后续确认合规采集入口。

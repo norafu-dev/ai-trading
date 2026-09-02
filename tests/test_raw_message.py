@@ -74,6 +74,17 @@ async def test_repository_persists_and_reads_complete_raw_message(session) -> No
 
 
 @pytest.mark.asyncio
+async def test_create_if_absent_is_idempotent(session) -> None:
+    repository = RawMessageRepository(session)
+    first, first_created = await repository.create_if_absent(make_raw_message())
+    duplicate, duplicate_created = await repository.create_if_absent(make_raw_message())
+
+    assert first_created is True
+    assert duplicate_created is False
+    assert duplicate.id == first.id
+
+
+@pytest.mark.asyncio
 async def test_platform_message_id_unique_constraint_rejects_duplicates(session) -> None:
     repository = RawMessageRepository(session)
     await repository.create(make_raw_message())
