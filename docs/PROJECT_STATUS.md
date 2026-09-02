@@ -23,7 +23,7 @@ M1 的目标是从 Discord 目标频道获取消息，通过可替换的 Collect
 | --- | --- | --- | --- |
 | ✅ 已完成 | INIT-001 | 初始化 AI Copy Trading 项目 | FastAPI、PostgreSQL、Alembic 与 Next.js 初始化已进入 `main` |
 | 🟡 PR 审核中 | DOCS-001 | 建立项目架构基线 | GitHub PR #1 仍为 Open，尚未 Merge 到 `main` |
-| 🟡 PR 审核中 | INGEST-001 | 实现 RawMessage 领域模型 | GitHub PR #2 仍为 Open，尚未 Merge 到 `main` |
+| 🟡 PR 审核中 | INGEST-001 | 实现 RawMessage 领域模型 | GitHub PR #2 已按 Review 更新，尚未 Merge 到 `main` |
 | 🟡 PR 审核中 | DOCS-002 | 建立 Agent 固定交付规范与项目进度可视化机制 | GitHub PR #3 已创建，尚未 Merge 到 `main` |
 | ⏳ 待开始 | INGEST-002 | 实现 Collector 抽象层 | 未开始 |
 | ⏳ 待开始 | INGEST-003 | 实现 Discord Collector | 未开始 |
@@ -38,10 +38,10 @@ flowchart LR
     DOCS1["DOCS-001<br/>架构基线<br/>PR 审核中"]
     INGEST1["INGEST-001<br/>RawMessage 领域模型<br/>PR 审核中"]
     DOCS2["DOCS-002<br/>Agent 交付规范<br/>PR 审核中"]
-    INGEST2["INGEST-002<br/>Collector 抽象层<br/>待开始"]
+    INGEST2["INGEST-002<br/>Collector 抽象<br/>待开始"]
     INGEST3["INGEST-003<br/>Discord Collector<br/>待开始"]
-    INGEST4["INGEST-004<br/>可靠性与自动恢复<br/>待开始"]
-    INGEST5["INGEST-005<br/>采集监控 API<br/>待开始"]
+    INGEST4["INGEST-004<br/>可靠性与恢复<br/>待开始"]
+    INGEST5["INGEST-005<br/>监控 API<br/>待开始"]
 
     INIT --> INGEST1 --> INGEST2 --> INGEST3 --> INGEST4 --> INGEST5
     INIT --> DOCS1 --> DOCS2
@@ -77,4 +77,4 @@ flowchart LR
 
 1. 审核并决定是否 Merge DOCS-001 PR #1、INGEST-001 PR #2 和 DOCS-002 PR #3。
 2. 只有在相应 PR Merge 到 `main` 后，才将状态改为“✅ 已完成”。
-3. 不在 DOCS-002 中开始 INGEST-002。
+3. 不在 INGEST-001 中开始 INGEST-002。

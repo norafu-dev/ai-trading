@@ -2,6 +2,8 @@ from datetime import UTC, datetime
 
 import pytest
 from pydantic import ValidationError
+from sqlalchemy.dialects import postgresql
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import StaticPool
@@ -12,9 +14,13 @@ from backend.ingestion.repository import RawMessageRepository
 from backend.ingestion.schemas import RawMessageCreate, RawMessageRead
 
 
-def make_raw_message(*, message_id: str = "123456789") -> RawMessageCreate:
+def make_raw_message(
+    *,
+    platform: str = "discord",
+    message_id: str = "123456789",
+) -> RawMessageCreate:
     return RawMessageCreate(
-        platform="discord",
+        platform=platform,
         guild_id="guild-1",
         channel_id="channel-1",
         message_id=message_id,
@@ -53,7 +59,10 @@ async def test_repository_persists_and_reads_complete_raw_message(session) -> No
 
     created = await repository.create(data)
     await session.commit()
-    stored = await repository.get_by_message_id(data.message_id)
+    stored = await repository.get_by_platform_message_id(
+        data.platform,
+        data.message_id,
+    )
 
     assert stored is not None
     assert stored.id == created.id
@@ -65,12 +74,36 @@ async def test_repository_persists_and_reads_complete_raw_message(session) -> No
 
 
 @pytest.mark.asyncio
-async def test_message_id_unique_constraint_rejects_duplicates(session) -> None:
+async def test_platform_message_id_unique_constraint_rejects_duplicates(session) -> None:
     repository = RawMessageRepository(session)
     await repository.create(make_raw_message())
 
     with pytest.raises(IntegrityError):
         await repository.create(make_raw_message())
+
+
+@pytest.mark.asyncio
+async def test_same_message_id_from_different_platforms_can_be_saved_and_queried(
+    session,
+) -> None:
+    repository = RawMessageRepository(session)
+    discord = await repository.create(make_raw_message(platform="discord"))
+    telegram = await repository.create(make_raw_message(platform="telegram"))
+    await session.commit()
+
+    stored_discord = await repository.get_by_platform_message_id(
+        "discord",
+        discord.message_id,
+    )
+    stored_telegram = await repository.get_by_platform_message_id(
+        "telegram",
+        telegram.message_id,
+    )
+
+    assert stored_discord is not None
+    assert stored_discord.id == discord.id
+    assert stored_telegram is not None
+    assert stored_telegram.id == telegram.id
 
 
 def test_schema_rejects_blank_source_identifiers() -> None:
@@ -80,6 +113,14 @@ def test_schema_rejects_blank_source_identifiers() -> None:
 
 def test_unique_constraint_has_stable_name() -> None:
     assert any(
-        constraint.name == "uq_raw_messages_message_id"
+        constraint.name == "uq_raw_messages_platform_message_id"
+        and tuple(column.name for column in constraint.columns)
+        == ("platform", "message_id")
         for constraint in RawMessage.__table__.constraints
     )
+
+
+def test_postgresql_uses_jsonb_for_raw_json_documents() -> None:
+    for column_name in ("attachments", "embeds", "raw_payload"):
+        column_type = RawMessage.__table__.c[column_name].type
+        assert isinstance(column_type.dialect_impl(postgresql.dialect()), JSONB)
