@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from apps.api.app.config import get_settings
 from apps.api.app.database import Base
+from backend.ingestion import models as ingestion_models  # noqa: F401
 
 
 config = context.config
@@ -14,7 +15,6 @@ config.set_main_option("sqlalchemy.url", str(get_settings().database_url))
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Import domain models here once they exist. No business tables are part of INIT-001.
 target_metadata = Base.metadata
 
 
