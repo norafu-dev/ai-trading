@@ -3,9 +3,13 @@ from typing import Any
 from uuid import UUID, uuid4
 
 from sqlalchemy import DateTime, JSON, String, Text, UniqueConstraint, func
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from apps.api.app.database import Base
+
+
+JSON_DOCUMENT = JSON().with_variant(JSONB(), "postgresql")
 
 
 class RawMessage(Base):
@@ -13,7 +17,11 @@ class RawMessage(Base):
 
     __tablename__ = "raw_messages"
     __table_args__ = (
-        UniqueConstraint("message_id", name="uq_raw_messages_message_id"),
+        UniqueConstraint(
+            "platform",
+            "message_id",
+            name="uq_raw_messages_platform_message_id",
+        ),
     )
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
@@ -26,19 +34,19 @@ class RawMessage(Base):
     content: Mapped[str] = mapped_column(Text, nullable=False)
     reply_to_message_id: Mapped[str | None] = mapped_column(String(64))
     attachments: Mapped[list[dict[str, Any]]] = mapped_column(
-        JSON,
+        JSON_DOCUMENT,
         nullable=False,
         default=list,
     )
     embeds: Mapped[list[dict[str, Any]]] = mapped_column(
-        JSON,
+        JSON_DOCUMENT,
         nullable=False,
         default=list,
     )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     edited_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     raw_payload: Mapped[dict[str, Any]] = mapped_column(
-        JSON,
+        JSON_DOCUMENT,
         nullable=False,
         default=dict,
     )

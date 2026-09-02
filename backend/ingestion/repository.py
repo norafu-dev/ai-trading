@@ -18,6 +18,13 @@ class RawMessageRepository:
         await self._session.refresh(raw_message)
         return raw_message
 
-    async def get_by_message_id(self, message_id: str) -> RawMessage | None:
-        statement = select(RawMessage).where(RawMessage.message_id == message_id)
+    async def get_by_platform_message_id(
+        self,
+        platform: str,
+        message_id: str,
+    ) -> RawMessage | None:
+        statement = select(RawMessage).where(
+            RawMessage.platform == platform,
+            RawMessage.message_id == message_id,
+        )
         return await self._session.scalar(statement)

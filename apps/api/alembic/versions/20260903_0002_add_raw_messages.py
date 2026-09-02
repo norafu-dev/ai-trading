@@ -6,12 +6,15 @@ Revises: 20260902_0001
 
 import sqlalchemy as sa
 from alembic import op
+from sqlalchemy.dialects import postgresql
 
 
 revision: str = "20260903_0002"
 down_revision: str | None = "20260902_0001"
 branch_labels: str | None = None
 depends_on: str | None = None
+
+json_document = sa.JSON().with_variant(postgresql.JSONB(), "postgresql")
 
 
 def upgrade() -> None:
@@ -26,11 +29,11 @@ def upgrade() -> None:
         sa.Column("author_name", sa.String(length=255), nullable=False),
         sa.Column("content", sa.Text(), nullable=False),
         sa.Column("reply_to_message_id", sa.String(length=64), nullable=True),
-        sa.Column("attachments", sa.JSON(), nullable=False),
-        sa.Column("embeds", sa.JSON(), nullable=False),
+        sa.Column("attachments", json_document, nullable=False),
+        sa.Column("embeds", json_document, nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("edited_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("raw_payload", sa.JSON(), nullable=False),
+        sa.Column("raw_payload", json_document, nullable=False),
         sa.Column(
             "ingested_at",
             sa.DateTime(timezone=True),
@@ -38,7 +41,11 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("message_id", name="uq_raw_messages_message_id"),
+        sa.UniqueConstraint(
+            "platform",
+            "message_id",
+            name="uq_raw_messages_platform_message_id",
+        ),
     )
 
 
