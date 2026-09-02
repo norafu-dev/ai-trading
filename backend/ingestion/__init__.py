@@ -1,0 +1,1 @@
+"""Message-ingestion domain placeholder."""
